@@ -1,4 +1,6 @@
 
+using MaintenanceApi.Middleware;
+using MaintenanceApi.Service;
 using MaintenanceApi.Util;
 using Scalar.AspNetCore;
 
@@ -16,8 +18,12 @@ namespace MaintenanceApi
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
             builder.Services.AddScoped<Ldap>();
+            builder.Services.AddScoped<LdapService>();
+            builder.Services.AddScoped<AuthService>();
 
             var app = builder.Build();
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
