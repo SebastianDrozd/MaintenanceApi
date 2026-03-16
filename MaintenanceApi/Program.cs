@@ -2,6 +2,7 @@
 using MaintenanceApi.Middleware;
 using MaintenanceApi.Service;
 using MaintenanceApi.Util;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Scalar.AspNetCore;
 
 namespace MaintenanceApi
@@ -21,6 +22,34 @@ namespace MaintenanceApi
             builder.Services.AddScoped<LdapService>();
             builder.Services.AddScoped<AuthService>();
 
+
+            builder.Services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => 
+                {
+                    options.Cookie.Name = "maintenance_auth";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+
+                    options.LoginPath = "/api/auth/login";
+                    options.AccessDeniedPath = "/api/auth/denied";
+
+                    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                    options.SlidingExpiration = true;
+                });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: "AllowSpecificOrigin",
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("http://localhost:3000")
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+                                  });
+            });
+
             var app = builder.Build();
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -31,7 +60,7 @@ namespace MaintenanceApi
                 app.MapOpenApi();
                 app.MapScalarApiReference();
             }
-
+            app.UseCors("AllowSpecificOrigin");
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
