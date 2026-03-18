@@ -1,4 +1,5 @@
 
+using MaintenanceApi.Data.Dapper;
 using MaintenanceApi.Middleware;
 using MaintenanceApi.Service;
 using MaintenanceApi.Util;
@@ -21,7 +22,8 @@ namespace MaintenanceApi
             builder.Services.AddScoped<Ldap>();
             builder.Services.AddScoped<LdapService>();
             builder.Services.AddScoped<AuthService>();
-
+            builder.Services.AddScoped<AssetsService>();
+            builder.Services.AddScoped<AssetsRepo>();
 
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
