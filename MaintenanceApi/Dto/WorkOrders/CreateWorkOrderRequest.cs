@@ -1,0 +1,14 @@
+﻿namespace MaintenanceApi.Dto.WorkOrders
+{
+    public class CreateWorkOrderRequest
+    {
+        public string? Asset { get; set; }
+        public int Mechanic { get; set; }
+        public string Requestor { get; set; }
+        public string Description { get; set; }
+        public string Priority { get; set; }
+        public string? DueDate { get; set; }
+        public List<IFormFile>? Photos { get; set; }
+
+    }
+}

@@ -24,6 +24,12 @@ namespace MaintenanceApi
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<AssetsService>();
             builder.Services.AddScoped<AssetsRepo>();
+            builder.Services.AddScoped<MechanicsRepo>();
+            builder.Services.AddScoped<MechanicService>();
+            builder.Services.AddScoped<WorkOrdersService>();
+            builder.Services.AddScoped<WorkOrdersRepo>();
+            builder.Services.AddScoped<WorkOrdersImagesRepo>();
+
 
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -47,6 +53,8 @@ namespace MaintenanceApi
                                   policy =>
                                   {
                                       policy.WithOrigins("http://localhost:3000")
+                                        .AllowCredentials()
+                                          
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                                   });
@@ -64,6 +72,8 @@ namespace MaintenanceApi
             }
             app.UseCors("AllowSpecificOrigin");
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
