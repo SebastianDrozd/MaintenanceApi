@@ -16,10 +16,21 @@ namespace MaintenanceApi.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetTopWorkOrders() 
+        {
+            var workorders = await _service.GetTopWorkOrders();
+            return Ok(workorders);
+        }
+
         [HttpGet("{id}",Name ="GetWorkOrder")]
         public async Task<ActionResult> GetWorkOrderById(int id) 
         {
             var wo = await _service.GetWorkOrderById(id);
+            if (wo == null) 
+            {
+                return NotFound();
+            }
             return Ok(wo);
         }
 

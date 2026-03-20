@@ -47,5 +47,21 @@ namespace MaintenanceApi.Data.Dapper
                 id
             })).AsList();
         }
+
+        public async Task<List<dynamic>> GetTopWorkOrders() 
+        {
+            string sql = @"Select wo.Id , wo.Priority, wo.Type, wo.status,wo.Date, wo.Requestor, wo.Description, wo.Status,mech.FirstName, mech.LastName, a.comp_desc from workorders wo
+                           inner join mechanics mech
+                            on mech.id = wo.mechanic
+                            inner join assets a
+                            on wo.asset = a.compid
+                            where status = 'open'
+                            Order by wo.date DESC
+                            limit 10
+                            ";
+            await using var connection = new MySqlConnection(_myslConnectionString);
+
+            return (await connection.QueryAsync<dynamic>(sql)).AsList();
+        }
     }
 }

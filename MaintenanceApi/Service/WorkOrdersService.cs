@@ -8,14 +8,14 @@ namespace MaintenanceApi.Service
         private readonly WorkOrdersRepo _repo;
         private readonly WorkOrdersImagesRepo _imagesRepo;
 
-        public WorkOrdersService(WorkOrdersRepo repo,WorkOrdersImagesRepo imagesRepo) 
+        public WorkOrdersService(WorkOrdersRepo repo, WorkOrdersImagesRepo imagesRepo)
         {
             _repo = repo;
             _imagesRepo = imagesRepo;
         }
 
 
-        public async Task<int> CreateWorkOrder(CreateWorkOrderRequest wo) 
+        public async Task<int> CreateWorkOrder(CreateWorkOrderRequest wo)
         {
             Console.WriteLine(wo.Asset);
             DateTime? dueDate = null;
@@ -60,15 +60,21 @@ namespace MaintenanceApi.Service
         }
 
 
-        public async Task<dynamic> GetWorkOrderById(int id) 
+        public async Task<dynamic> GetWorkOrderById(int id)
         {
             var workorder = await _repo.GetWorkOrderById(id);
             var photos = await _imagesRepo.GetWorkOrderImages(id);
-            return new 
+            return new
             {
                 workorder,
                 photos
             };
+        }
+
+        public async Task<dynamic> GetTopWorkOrders() 
+        {
+            var workOrders = await _repo.GetTopWorkOrders();
+            return workOrders;
         }
     }
 }
