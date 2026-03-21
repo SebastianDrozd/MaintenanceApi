@@ -59,6 +59,20 @@ namespace MaintenanceApi.Service
 
         }
 
+        public async Task<int> CloseWorkOrder(CloseWorkOrderRequest wo, int id) 
+        {
+            var res = await _repo.CloseWorkOrder(new CloseWorkOrderSave 
+            {
+                Id = id,
+                ClosedDescription = wo.ClosedDescription,
+                ClosedHours = wo.ClosedHours,
+                ClosedMinutes = wo.ClosedMinutes,
+                ClosedBy = wo.ClosedBy,
+
+            });
+            return res;
+        }
+
 
         public async Task<dynamic> GetWorkOrderById(int id)
         {
@@ -74,6 +88,12 @@ namespace MaintenanceApi.Service
         public async Task<dynamic> GetTopWorkOrders() 
         {
             var workOrders = await _repo.GetTopWorkOrders();
+            return workOrders;
+        }
+
+        public async Task<dynamic> GetWorkOrdersQuery(string sortBy) 
+        {
+            var workOrders = await _repo.GetWorkOrdersQuery(sortBy);
             return workOrders;
         }
     }

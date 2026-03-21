@@ -23,6 +23,13 @@ namespace MaintenanceApi.Controllers
             return Ok(workorders);
         }
 
+        [HttpGet("query")]
+        public async Task<ActionResult> GetWorkOrdersQuery([FromQuery] string sortBy) 
+        {
+            var workOrders = await _service.GetWorkOrdersQuery(sortBy);
+            return Ok(workOrders);
+        } 
+
         [HttpGet("{id}",Name ="GetWorkOrder")]
         public async Task<ActionResult> GetWorkOrderById(int id) 
         {
@@ -44,6 +51,13 @@ namespace MaintenanceApi.Controllers
             });
         }
 
+        [HttpPut("close/{id}")]
+        public async Task<ActionResult> CloseWorkOrder([FromRoute] int id,[FromForm] CloseWorkOrderRequest wo) 
+        {
+            Console.WriteLine(id);
+            var res = await _service.CloseWorkOrder(wo,id);
+            return Ok(res);
+        }
        
     }
 }

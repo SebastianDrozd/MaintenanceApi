@@ -33,6 +33,24 @@ namespace MaintenanceApi.Data.Dapper
             return id;
         }
 
+        public async Task<int> CloseWorkOrder(CloseWorkOrderSave wo) 
+        {
+            string sql = "UPDATE workorders " +
+                          "set Status = 'Completed', ClosedDescription = @ClosedDescription, ClosedHours = @ClosedHours, ClosedMinutes = @ClosedMinutes,ClosedDate= CURDATE(), ClosedBy = @ClosedBy WHERE Id = @Id";
+                          
+            await using var connection = new MySqlConnection(_myslConnectionString);
+
+           var id = await connection.ExecuteAsync(sql, new 
+           {
+               wo.ClosedDescription,
+               wo.ClosedHours,
+               wo.ClosedMinutes,
+               wo.ClosedBy,
+               wo.Id
+           });
+            return id;
+        }
+
         public async Task<dynamic> GetWorkOrderById(int id) 
         {
             string sql  = @"Select * from workorders wo
@@ -59,6 +77,45 @@ namespace MaintenanceApi.Data.Dapper
                             Order by wo.date DESC
                             limit 10
                             ";
+            await using var connection = new MySqlConnection(_myslConnectionString);
+
+            return (await connection.QueryAsync<dynamic>(sql)).AsList();
+        }
+
+        public async Task<List<dynamic>> GetWorkOrdersQuery(string sortBy)
+        {
+            var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Id",
+        "Priority",
+        "Type",
+        "Status",
+        "Date",
+        "Requestor"
+    };
+
+            // Default fallback
+            var column = allowedColumns.Contains(sortBy) ? sortBy : "Date";
+
+            string sql = $@"
+             SELECT 
+            wo.Id, 
+            wo.Priority, 
+            wo.Type, 
+            wo.Status,
+            wo.Date, 
+            wo.Requestor, 
+            wo.Description, 
+            mech.FirstName, 
+            mech.LastName, 
+            a.comp_desc 
+        FROM workorders wo
+        INNER JOIN mechanics mech ON mech.id = wo.mechanic
+        INNER JOIN assets a ON wo.asset = a.compid
+        WHERE wo.status = 'open'
+        ORDER BY wo.{column} ASC
+    ";
+
             await using var connection = new MySqlConnection(_myslConnectionString);
 
             return (await connection.QueryAsync<dynamic>(sql)).AsList();
