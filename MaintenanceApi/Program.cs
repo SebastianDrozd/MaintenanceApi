@@ -5,6 +5,7 @@ using MaintenanceApi.Service;
 using MaintenanceApi.Util;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Scalar.AspNetCore;
+using Serilog;
 
 namespace MaintenanceApi
 {
@@ -12,6 +13,11 @@ namespace MaintenanceApi
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console() // Optional: writes to console as well
+    .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day) // Writes to a file named 'myapp.txt' in a 'logs' directory
+    .CreateLogger();
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -29,7 +35,8 @@ namespace MaintenanceApi
             builder.Services.AddScoped<WorkOrdersService>();
             builder.Services.AddScoped<WorkOrdersRepo>();
             builder.Services.AddScoped<WorkOrdersImagesRepo>();
-
+            // Use Serilog as the logging provider
+            builder.Host.UseSerilog();
 
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

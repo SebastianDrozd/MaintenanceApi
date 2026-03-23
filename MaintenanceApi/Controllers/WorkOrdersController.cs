@@ -44,12 +44,19 @@ namespace MaintenanceApi.Controllers
         [HttpPost(Name ="SaveWorkOrder")]
         public async Task<ActionResult> CreateWorkOrder([FromForm] CreateWorkOrderRequest wo) 
         {
+
          var id = await _service.CreateWorkOrder(wo);
-            return CreatedAtRoute("GetWorkOrder", new
-            {
-                id
-            });
+            return Ok(id);
+          
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateWorkOrder([FromForm] UpdateWorkOrderRequest wo, [FromRoute] int id) 
+        {
+            var result = await _service.UpdateWorkOrder(wo, id);
+            return Ok(result);
+        }
+
 
         [HttpPut("close/{id}")]
         public async Task<ActionResult> CloseWorkOrder([FromRoute] int id,[FromForm] CloseWorkOrderRequest wo) 

@@ -7,13 +7,13 @@ namespace MaintenanceApi.Service
     {
         private readonly WorkOrdersRepo _repo;
         private readonly WorkOrdersImagesRepo _imagesRepo;
-
+        
         public WorkOrdersService(WorkOrdersRepo repo, WorkOrdersImagesRepo imagesRepo)
         {
             _repo = repo;
             _imagesRepo = imagesRepo;
         }
-
+            
 
         public async Task<int> CreateWorkOrder(CreateWorkOrderRequest wo)
         {
@@ -32,7 +32,7 @@ namespace MaintenanceApi.Service
 
             });
             //handle images
-            if (newId > 0)
+            if (newId > 0 && wo?.Photos?.Count > 0)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsFolder))
@@ -57,6 +57,13 @@ namespace MaintenanceApi.Service
             }
             return newId;
 
+        }
+
+
+        public async Task<int> UpdateWorkOrder(UpdateWorkOrderRequest wo,int id) 
+        {
+            var result = await _repo.UpdateWorkOrder(wo, id);
+            return result;
         }
 
         public async Task<int> CloseWorkOrder(CloseWorkOrderRequest wo, int id) 

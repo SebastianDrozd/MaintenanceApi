@@ -33,6 +33,25 @@ namespace MaintenanceApi.Data.Dapper
             return id;
         }
 
+        public async Task<int> UpdateWorkOrder(UpdateWorkOrderRequest wo, int id) 
+        {
+            string sql = @"update workorders
+                            set Description = @description,Mechanic = @mechanic, Asset = @asset, DueDate = @dueDate, Priority = @priority
+                            where Id = @id";
+            await using var connection = new MySqlConnection(_myslConnectionString);
+
+            var test =  await connection.ExecuteAsync(sql, new 
+            {
+                wo.Description,
+                wo.Mechanic,
+                wo.Asset,
+                wo.DueDate,
+                wo.Priority,
+                id
+            });
+            return test;
+        }
+
         public async Task<int> CloseWorkOrder(CloseWorkOrderSave wo) 
         {
             string sql = "UPDATE workorders " +
