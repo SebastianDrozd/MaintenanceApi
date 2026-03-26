@@ -68,7 +68,7 @@ namespace MaintenanceApi.Service
 
         public async Task<int> CloseWorkOrder(CloseWorkOrderRequest wo, int id) 
         {
-            var res = await _repo.CloseWorkOrder(new CloseWorkOrderSave 
+            var rowsAffected = await _repo.CloseWorkOrder(new CloseWorkOrderSave 
             {
                 Id = id,
                 ClosedDescription = wo.ClosedDescription,
@@ -77,18 +77,48 @@ namespace MaintenanceApi.Service
                 ClosedBy = wo.ClosedBy,
 
             });
-            return res;
+         
+            if (rowsAffected > 0 && wo.ClosedPhoto != null) 
+            {
+                Console.WriteLine("phot is not null.activing save");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                    var file = wo.ClosedPhoto;
+              
+                    var extension = Path.GetExtension(file.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    await _imagesRepo.SaveWorkOrderImageClosed(new SaveWorkerOrderImage
+                    {
+                        Path = uniqueFileName,
+                        WorkOrderId = id
+                    });
+              
+
+            }
+            return 1;
         }
 
 
         public async Task<dynamic> GetWorkOrderById(int id)
         {
             var workorder = await _repo.GetWorkOrderById(id);
+           
             var photos = await _imagesRepo.GetWorkOrderImages(id);
+            var closedPhoto = await _imagesRepo.GetWorkOrderImagesClosed(id);
             return new
             {
                 workorder,
-                photos
+                photos,
+                closedPhoto
             };
         }
 
@@ -98,9 +128,9 @@ namespace MaintenanceApi.Service
             return workOrders;
         }
 
-        public async Task<dynamic> GetWorkOrdersQuery(string sortBy) 
+        public async Task<dynamic> GetWorkOrdersQuery(string sortBy,string sortDirection) 
         {
-            var workOrders = await _repo.GetWorkOrdersQuery(sortBy);
+            var workOrders = await _repo.GetWorkOrdersQuery(sortBy,sortDirection);
             return workOrders;
         }
     }

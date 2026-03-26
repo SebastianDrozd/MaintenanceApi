@@ -27,6 +27,21 @@ namespace MaintenanceApi.Data.Dapper
 
         }
 
+
+        public async Task<dynamic> SaveWorkOrderImageClosed(SaveWorkerOrderImage image) 
+        {
+            string sql = @"Insert into workordersimagesclosed(Path,WorkOrderId)
+                            values (@Path,@WorkOrderId)";
+
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.ExecuteAsync(sql, new 
+            {
+                image.Path,
+                image.WorkOrderId
+            });
+        }
+
+
         public async Task<dynamic> GetWorkOrderImages(int id) 
         {
             string sql = @"select * from workordersimages where WorkOrderId = @id";
@@ -34,6 +49,17 @@ namespace MaintenanceApi.Data.Dapper
             await using var connection = new MySqlConnection(_mysqlConnectionString);
 
             return (await connection.QueryAsync<dynamic>(sql, new { id })).AsList();
+        }
+
+        public async Task<dynamic> GetWorkOrderImagesClosed(int id) 
+        {
+            string sql = @"select * from workordersimagesclosed where WorkOrderId = @id";
+
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return (await connection.QueryAsync<dynamic>(sql, new
+            {
+                id
+            })).AsList();
         }
     }
 }

@@ -70,11 +70,13 @@ namespace MaintenanceApi.Data.Dapper
             return id;
         }
 
-        public async Task<dynamic> GetWorkOrderById(int id) 
+        public async Task<List<dynamic>> GetWorkOrderById(int id) 
         {
             string sql  = @"Select * from workorders wo
                             Inner Join mechanics mech
                             on mech.Id = wo.Mechanic 
+                            Inner join assets a
+                            on a.compid = wo.Asset
                              where wo.Id = @id";
 
             await using var connection = new MySqlConnection(_myslConnectionString);
@@ -101,39 +103,19 @@ namespace MaintenanceApi.Data.Dapper
             return (await connection.QueryAsync<dynamic>(sql)).AsList();
         }
 
-        public async Task<List<dynamic>> GetWorkOrdersQuery(string sortBy)
+        public async Task<List<dynamic>> GetWorkOrdersQuery(string sortBy,string sortDirection)
         {
-            var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    {
-        "Id",
-        "Priority",
-        "Type",
-        "Status",
-        "Date",
-        "Requestor"
-    };
+            var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase){"Id","Priority","Type","Status","Date","Requestor"};
 
             // Default fallback
             var column = allowedColumns.Contains(sortBy) ? sortBy : "Date";
 
-            string sql = $@"
-             SELECT 
-            wo.Id, 
-            wo.Priority, 
-            wo.Type, 
-            wo.Status,
-            wo.Date, 
-            wo.Requestor, 
-            wo.Description, 
-            mech.FirstName, 
-            mech.LastName, 
-            a.comp_desc 
-        FROM workorders wo
-        INNER JOIN mechanics mech ON mech.id = wo.mechanic
-        INNER JOIN assets a ON wo.asset = a.compid
-        WHERE wo.status = 'open'
-        ORDER BY wo.{column} ASC
-    ";
+            string sql = $@"SELECT wo.Id,wo.Priority,wo.Type,wo.Status,wo.Date,wo.Requestor,wo.Description, mech.FirstName,mech.LastName,a.comp_desc 
+                            FROM workorders wo
+                            INNER JOIN mechanics mech ON mech.id = wo.mechanic
+                            INNER JOIN assets a ON wo.asset = a.compid
+                            ORDER BY wo.{column} {sortDirection}
+                            LIMIT 15";
 
             await using var connection = new MySqlConnection(_myslConnectionString);
 

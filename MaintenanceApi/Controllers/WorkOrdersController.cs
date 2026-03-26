@@ -24,9 +24,9 @@ namespace MaintenanceApi.Controllers
         }
 
         [HttpGet("query")]
-        public async Task<ActionResult> GetWorkOrdersQuery([FromQuery] string sortBy) 
+        public async Task<ActionResult> GetWorkOrdersQuery([FromQuery] string sortBy,string sortDirection) 
         {
-            var workOrders = await _service.GetWorkOrdersQuery(sortBy);
+            var workOrders = await _service.GetWorkOrdersQuery(sortBy,sortDirection);
             return Ok(workOrders);
         } 
 
