@@ -34,6 +34,8 @@ namespace MaintenanceApi
             builder.Services.AddScoped<WorkOrdersRepo>();
             builder.Services.AddScoped<WorkOrdersImagesRepo>();
             builder.Services.AddScoped<PdfService>();
+            builder.Services.AddScoped<PreventativeMaintenanceRepo>();
+            builder.Services.AddScoped<PreventativeMaintenanceService>();
             // Use Serilog as the logging provider
       
 

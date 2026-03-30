@@ -23,6 +23,7 @@ namespace MaintenanceApi.Service
                 dueDate = DateTime.Parse(wo.DueDate);
             var newId = await _repo.SaveWorkOrder(new SaveWorkOrder
             {
+                Type = wo.Type,
                 Asset = wo.Asset,
                 Mechanic = wo.Mechanic,
                 Requestor = wo.Requestor,
@@ -128,9 +129,15 @@ namespace MaintenanceApi.Service
             return workOrders;
         }
 
-        public async Task<dynamic> GetWorkOrdersQuery(string sortBy,string sortDirection) 
+        public async Task<dynamic> GetWorkOrdersQuery(string sortBy,string sortDirection,string searchTerm,string status,string priority) 
+
         {
-            var workOrders = await _repo.GetWorkOrdersQuery(sortBy,sortDirection);
+            if (searchTerm.IsWhiteSpace()) 
+            {
+                Console.WriteLine("String is whitespace");
+                searchTerm = string.Empty;
+            }
+            var workOrders = await _repo.GetWorkOrdersQuery(sortBy,sortDirection,searchTerm,status,priority);
             return workOrders;
         }
     }

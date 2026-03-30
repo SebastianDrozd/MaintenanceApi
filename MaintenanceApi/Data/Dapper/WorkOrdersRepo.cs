@@ -16,12 +16,13 @@ namespace MaintenanceApi.Data.Dapper
         public async Task<int> SaveWorkOrder(SaveWorkOrder wo)
         {
             string sql = @"
-        INSERT INTO workorders(DueDate,Requestor,Description,Priority,Mechanic,Asset)
-        VALUES (@DueDate,@Requestor,@Description,@Priority,@Mechanic,@Asset);
+        INSERT INTO workorders(Type,DueDate,Requestor,Description,Priority,Mechanic,Asset)
+        VALUES (@Type,@DueDate,@Requestor,@Description,@Priority,@Mechanic,@Asset);
         SELECT LAST_INSERT_ID();";
             await using var connection = new MySqlConnection(_myslConnectionString);
             var id = await connection.ExecuteScalarAsync<int>(sql, new
             {
+                wo.Type,
                 wo.DueDate,
                 wo.Requestor,
                 wo.Description,
@@ -103,8 +104,9 @@ namespace MaintenanceApi.Data.Dapper
             return (await connection.QueryAsync<dynamic>(sql)).AsList();
         }
 
-        public async Task<List<dynamic>> GetWorkOrdersQuery(string sortBy,string sortDirection)
+        public async Task<List<dynamic>> GetWorkOrdersQuery(string sortBy,string sortDirection, string searchTerm,string status,string priority)
         {
+            Console.WriteLine($"This is sortby : {sortBy}, this is direction : {sortDirection}. This is term : {searchTerm}");
             var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase){"Id","Priority","Type","Status","Date","Requestor"};
 
             // Default fallback
@@ -114,6 +116,7 @@ namespace MaintenanceApi.Data.Dapper
                             FROM workorders wo
                             INNER JOIN mechanics mech ON mech.id = wo.mechanic
                             INNER JOIN assets a ON wo.asset = a.compid
+                            Where wo.Description like '%{searchTerm}%' AND wo.Status like '%{status}%' AND wo.Priority like '%{priority}%%'
                             ORDER BY wo.{column} {sortDirection}
                             LIMIT 15";
 
