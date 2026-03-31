@@ -2,6 +2,7 @@
 {
     public class ShortPmTemplateResponse
     {
+        public int Id { get; set; }
         public string Description { get; set; }
         public string Asset { get; set; }
         public string Frequency { get; set; }

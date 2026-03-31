@@ -67,9 +67,19 @@ namespace MaintenanceApi.Data.Dapper
             });
         }
 
+        public async Task<List<PmTask>> GetPmTasksByTemplateId(int id) 
+        {
+            string sql = @"select * from pmtasks where PmId = @id Order by Id";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return (await connection.QueryAsync<PmTask>(sql, new
+            {
+                id = id
+            })).AsList();
+        }
+
         public async Task<List<ShortPmTemplateResponse>> GetShortPmTempaltes() 
         {
-            string sql = @"select temp.Description as Description,temp.Frequency as Frequency,temp.LastRun as LastRun,temp.NextRunDate as NextRunDate, m.FirstName, m.LastName, a.comp_Desc as Asset
+            string sql = @"select temp.Id, temp.Description as Description,temp.Frequency as Frequency,temp.LastRun as LastRun,temp.NextRunDate as NextRunDate, m.FirstName, m.LastName, a.comp_Desc as Asset
                             from pmtemplate temp
                             Inner join mechanics m
                             on temp.Mechanic=m.Id
@@ -79,6 +89,48 @@ namespace MaintenanceApi.Data.Dapper
             return (await connection.QueryAsync<ShortPmTemplateResponse>(sql)).AsList();
         }
 
-      
+        public async Task<PmTemplateSqlWrapper> GetPmTemplateById(int id) 
+        {
+            string sql = @"select temp.Id, temp.Description , temp.Priority, temp.NextRunDate, temp.CreatedBy, temp.LastRun, temp.Frequency, temp.CreatedDate,temp.Status, asset.compid as AssetId, asset.comp_desc as AssetDesc, mech.Id as MechId, mech.FirstName as MechFirstname, mech.LastName as MechLastName
+                           from pmtemplate temp
+                           Inner Join assets asset on temp.Asset = asset.compid
+                           Inner join mechanics mech on temp.Mechanic = mech.Id
+                           where temp.Id = @id";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return (await connection.QueryFirstAsync<PmTemplateSqlWrapper>(sql, new 
+            {
+                id
+            }));
+        }
+
+        public async Task<int> UpdatePmTemplateById(UpdatePmTemplateRequest pm, int id) 
+        {
+            string sql = @"Update pmtemplate
+                           set Asset = @Asset, Mechanic = @Mechanic, Priority = @Priority, NextRunDate = @NextRunDate, Frequency = @Frequency, Description = @Description
+                            where Id = @id";
+
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.ExecuteAsync(sql, new 
+            {
+                pm.Asset,
+                pm.Mechanic,
+                pm.Priority,
+                pm.NextRunDate,
+                pm.Frequency,
+                pm.Description,
+                id
+            });
+        }
+
+        public async Task<int> DeletePmTemplate(int id) 
+        {
+            string sql = @"Delete from pmtemplate where Id = @id ";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.ExecuteAsync(sql, new 
+            {
+                id
+            });
+
+        }
     }
 }

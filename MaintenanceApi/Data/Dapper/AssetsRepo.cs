@@ -20,5 +20,12 @@ namespace MaintenanceApi.Data.Dapper
 
             return (await connection.QueryAsync<ShortAssetResponse>(sql)).AsList();
         }
+
+        public async Task<List<AssetResponse>> GetFullAllAssets() 
+        {
+            string sql = @"select * from assets";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return (await connection.QueryAsync<AssetResponse>(sql)).AsList();
+        }
     }
 }

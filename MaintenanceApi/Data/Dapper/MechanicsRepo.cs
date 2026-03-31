@@ -21,5 +21,15 @@ namespace MaintenanceApi.Data.Dapper
 
             return (await connection.QueryAsync<MechanicResponse>(sql)).AsList();
         }
+
+        public async Task<MechanicResponse> GetMechanicById(int id) 
+        {
+            var sql = @"Select * from mechanics where Id = @id";
+            await using var connection = new MySqlConnection(_MysqlConnectionString);
+            return (await connection.QueryFirstAsync<MechanicResponse>(sql, new 
+            {
+                id
+            }));
+        }
     }
 }

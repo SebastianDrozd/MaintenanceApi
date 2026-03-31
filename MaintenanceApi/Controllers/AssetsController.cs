@@ -1,4 +1,5 @@
 ﻿using MaintenanceApi.Data.Dapper;
+using MaintenanceApi.Dto.Assets;
 using MaintenanceApi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,11 @@ namespace MaintenanceApi.Controllers
         public async Task<ActionResult<List<dynamic>>> GetAllAssets() 
         {
             return Ok(await _service.GetAllAssets());
+        }
+        [HttpGet("full")]
+        public async Task<ActionResult<List<AssetResponse>>> GetAssets() 
+        {
+            return Ok(await _service.GetFullAllAssets());
         }
     }
 }

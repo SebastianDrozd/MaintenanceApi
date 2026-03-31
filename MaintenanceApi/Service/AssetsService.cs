@@ -18,5 +18,11 @@ namespace MaintenanceApi.Service
             var assets = await _repo.GetAllAssets();
             return assets;
         }
+
+        public async Task<List<AssetResponse>> GetFullAllAssets() 
+        {
+            var assets = await _repo.GetFullAllAssets();
+            return assets;
+        }
     }
 }

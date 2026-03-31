@@ -36,7 +36,7 @@ namespace MaintenanceApi.Controllers
         public async Task<ActionResult> CreatePmTemplate(CreatePmTemplateRequest pm) 
         {
             var res = await _service.CreateNewPmTemplate(pm);
-            return Ok(res);
+            return Created();
         }
 
         [HttpGet("templates/short")]
@@ -46,6 +46,26 @@ namespace MaintenanceApi.Controllers
             return Ok(pmTemplates);
         }
 
+        [HttpGet("templates/{id}",Name ="GetTemplateById")]
+        public async Task<ActionResult<FullPmTemplateResponse>> GetPmTemplateById(int id) 
+        {
+            var pmTemplate = await _service.GetPmTemplateById(id);
+            return Ok(pmTemplate);
+        }
+
+        [HttpPut("templates/{id}")]
+        public async Task<ActionResult> UpdatePmTemplate([FromRoute] int id, [FromBody] UpdatePmTemplateRequest pm) 
+        {
+            var res = await _service.UpdatePmTemplateById(pm, id);
+            return NoContent();
+        }
+
+        [HttpDelete("templates/{id}")]
+        public async Task<ActionResult> DeletePmTemplate(int id) 
+        {
+            var res = await _service.DeletePmTemplate(id);
+            return NoContent() ;
+        }
 
     }
 }
