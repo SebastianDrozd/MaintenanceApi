@@ -27,15 +27,20 @@ namespace MaintenanceApi.Data.Dapper
             await using var connection = new MySqlConnection(_mysqlConnectionString);
             return (await connection.QueryAsync<AssetResponse>(sql)).AsList();
         }
-        public async Task<List<AssetResponse>> GetAllAssetsQuery(int page, int pageSize)
+        public async Task<List<AssetResponse>> GetAllAssetsQuery(int page, int pageSize, string sortBy, string sortDirection)
         {
+            var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "compid", "comp_desc", "department", "line_no", "status", "manufacturer" };
+            var column = allowedColumns.Contains(sortBy) ? sortBy : "Date";
             int rows = (page - 1) * pageSize;
-            string sql = @"SELECT * 
+            string sql = $@"SELECT * 
                            FROM assets
+                           ORDER BY {column} {sortDirection}
                            LIMIT @pageSize OFFSET @rows;";
             await using var connection = new MySqlConnection(_mysqlConnectionString);
             return (await connection.QueryAsync<AssetResponse>(sql, new 
             {
+                sortBy,
+                sortDirection,
                 pageSize,
                 rows
             })).AsList();

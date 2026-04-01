@@ -26,11 +26,11 @@ namespace MaintenanceApi.Service
             return assets;
         }
 
-        public async Task<dynamic> GetAllAssetsQuery(int page,int pageSize)
+        public async Task<dynamic> GetAllAssetsQuery(int page,int pageSize,string sortBy, string sortDirection)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
-            var assets = await _repo.GetAllAssetsQuery(page, pageSize);
+            var assets = await _repo.GetAllAssetsQuery(page, pageSize, sortBy,sortDirection);
             var count = await _repo.CountAssets();
 
             var totalPages = (int)Math.Ceiling(count / (double)pageSize);

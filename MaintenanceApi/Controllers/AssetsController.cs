@@ -30,9 +30,10 @@ namespace MaintenanceApi.Controllers
         }
 
         [HttpGet("query")]
-        public async Task<ActionResult> GetAssetsQuery([FromQuery] int page, int pageSize) 
+        public async Task<ActionResult> GetAssetsQuery([FromQuery] int page, int pageSize, string sortBy,string sortDirection) 
         {
-            var res = await _service.GetAllAssetsQuery(page, pageSize);
+            Console.WriteLine($"page={page}, pageSize={pageSize}, sortBy={sortBy}, sortDirection={sortDirection}");
+            var res = await _service.GetAllAssetsQuery(page, pageSize,sortBy,sortDirection);
 
             return Ok(res);
         }

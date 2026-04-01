@@ -95,7 +95,7 @@ namespace MaintenanceApi.Data.Dapper
                             on mech.id = wo.mechanic
                             inner join assets a
                             on wo.asset = a.compid
-                            where status = 'open'
+                            where wo.status = 'open'
                             Order by wo.date DESC
                             limit 10
                             ";
