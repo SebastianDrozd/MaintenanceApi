@@ -27,5 +27,26 @@ namespace MaintenanceApi.Data.Dapper
             await using var connection = new MySqlConnection(_mysqlConnectionString);
             return (await connection.QueryAsync<AssetResponse>(sql)).AsList();
         }
+        public async Task<List<AssetResponse>> GetAllAssetsQuery(int page, int pageSize)
+        {
+            int rows = (page - 1) * pageSize;
+            string sql = @"SELECT * 
+                           FROM assets
+                           LIMIT @pageSize OFFSET @rows;";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return (await connection.QueryAsync<AssetResponse>(sql, new 
+            {
+                pageSize,
+                rows
+            })).AsList();
+        }
+
+        public async Task<int> CountAssets()
+        {
+            string sql = @"SELECT COUNT(compid) FROM assets";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+
+            return await connection.ExecuteScalarAsync<int>(sql);
+        }
     }
 }

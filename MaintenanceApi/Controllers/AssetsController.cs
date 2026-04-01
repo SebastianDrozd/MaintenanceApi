@@ -28,5 +28,13 @@ namespace MaintenanceApi.Controllers
         {
             return Ok(await _service.GetFullAllAssets());
         }
+
+        [HttpGet("query")]
+        public async Task<ActionResult> GetAssetsQuery([FromQuery] int page, int pageSize) 
+        {
+            var res = await _service.GetAllAssetsQuery(page, pageSize);
+
+            return Ok(res);
+        }
     }
 }
