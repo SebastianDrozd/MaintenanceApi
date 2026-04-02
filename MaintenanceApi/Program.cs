@@ -36,6 +36,7 @@ namespace MaintenanceApi
             builder.Services.AddScoped<PdfService>();
             builder.Services.AddScoped<PreventativeMaintenanceRepo>();
             builder.Services.AddScoped<PreventativeMaintenanceService>();
+            builder.Services.AddScoped<AssetImagesRepo>();
             // Use Serilog as the logging provider
       
 

@@ -30,11 +30,27 @@ namespace MaintenanceApi.Controllers
         }
 
         [HttpGet("query")]
-        public async Task<ActionResult> GetAssetsQuery([FromQuery] int page, int pageSize, string sortBy,string sortDirection) 
+        public async Task<ActionResult> GetAssetsQuery([FromQuery] int page, int pageSize, string sortBy,string sortDirection,string searchTerm ="",string status = "") 
         {
             Console.WriteLine($"page={page}, pageSize={pageSize}, sortBy={sortBy}, sortDirection={sortDirection}");
-            var res = await _service.GetAllAssetsQuery(page, pageSize,sortBy,sortDirection);
+            var res = await _service.GetAllAssetsQuery(page, pageSize,sortBy,sortDirection,searchTerm,status);
 
+            return Ok(res);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> CreateNewAsset([FromForm] CreateAssetRequest asset) 
+        {
+            Console.WriteLine("endpoint hit");
+            var res = await _service.CreateNewAsset(asset);
+
+            return Ok();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetAssetById(string id) 
+        {
+            var res = await _service.GetAssetById(id);
             return Ok(res);
         }
     }
