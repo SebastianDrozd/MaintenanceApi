@@ -98,5 +98,11 @@ namespace MaintenanceApi.Service
                 images = images
             };
         }
+
+        public async Task<int> UpdateAsset(string id, UpdateAssetRequest asset) 
+        {
+            var res = await _repo.UpdateAsset(id, asset);
+            return res;
+        }
     }
 }

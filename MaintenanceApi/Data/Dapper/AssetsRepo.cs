@@ -84,6 +84,27 @@ namespace MaintenanceApi.Data.Dapper
             }));
         }
 
+        public async Task<int> UpdateAsset(string id, UpdateAssetRequest asset) 
+        {
+            string sql = @"update assets set status = @status,department=@department,manufacturer = @manufacturer,model_no = @model_no,serial_no = @serial_no, purchase_date = @purchase_date, install_date = @install_date, last_service_date = @last_service_date, next_service_date = @next_service_date, full_desc = @full_desc
+                           where compid = @id";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.ExecuteAsync(sql, new 
+            {
+                asset.status,
+                asset.department,
+                asset.manufacturer, 
+                asset.model_no,
+                asset.serial_no,
+                asset.purchase_date,
+                asset.install_date,
+                asset.last_service_date,
+                asset.next_service_date,
+                asset.full_desc,
+                id
+            });
+        }
+
     
     }
 }

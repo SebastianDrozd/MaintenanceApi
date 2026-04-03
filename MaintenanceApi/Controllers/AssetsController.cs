@@ -50,8 +50,16 @@ namespace MaintenanceApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAssetById(string id) 
         {
+            Console.WriteLine($"Endpoint hit with ID : {id}");
             var res = await _service.GetAssetById(id);
             return Ok(res);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateAsset([FromRoute]string id, [FromForm] UpdateAssetRequest asset) 
+        {
+            var res = await _service.UpdateAsset(id, asset);
+            return NoContent();
         }
     }
 }
