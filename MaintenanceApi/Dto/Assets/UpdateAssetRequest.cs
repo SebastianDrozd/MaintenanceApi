@@ -2,11 +2,11 @@
 {
     public class UpdateAssetRequest
     {
-        public string status { get; set; }
-        public string department { get; set; }
-        public string manufacturer { get; set; }
-        public string model_no { get; set; }
-        public string serial_no { get; set; }
+        public string? status { get; set; }
+        public string? department { get; set; }
+        public string? manufacturer { get; set; }
+        public string? model_no { get; set; }
+        public string? serial_no { get; set; }
         public DateTime? purchase_date { get; set; }
         public DateTime? install_date { get; set; }
         public DateTime? last_service_date { get; set; }

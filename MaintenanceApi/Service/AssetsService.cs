@@ -101,7 +101,56 @@ namespace MaintenanceApi.Service
 
         public async Task<int> UpdateAsset(string id, UpdateAssetRequest asset) 
         {
+
+            Console.WriteLine($"Length of new Images {asset.newImages.Count}");
             var res = await _repo.UpdateAsset(id, asset);
+
+
+
+            if (asset.removedImageIds.Count > 0) 
+            {
+                foreach (var imageId in asset.removedImageIds) 
+                {
+                    AssetImage image = await _imagesRepo.GetImageById(imageId);
+                    Console.WriteLine($"THis is image that will be deleted {image.photo_path}");
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "assets");
+                   string filePath = $"{uploadsFolder}/{image.photo_path}";
+                    Console.WriteLine($"This is stringpath: {filePath}");
+                    if (File.Exists(filePath)) 
+                    {
+                        File.Delete(filePath);
+                        await _imagesRepo.DeleteAssetImageById(imageId);
+                    }                              
+                }
+
+            }
+
+
+
+            if (asset.newImages.Count > 0) 
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "assets");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+                foreach (var file in asset.newImages)
+                {
+                    var extension = Path.GetExtension(file.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    await _imagesRepo.CreateAssetPhoto(new SaveAssetImage
+                    {
+                        Path = uniqueFileName,
+                        AssetId = id.ToString()
+                    });
+                }
+
+            }
             return res;
         }
     }

@@ -35,5 +35,27 @@ namespace MaintenanceApi.Data.Dapper
                 id
             })).AsList();
         }
+
+        public async Task<int> DeleteAssetImageById(string id) 
+        {
+            string sql = @"DELETE from assetphotos where photo_id = @id";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.ExecuteAsync(sql, new
+            {
+                id
+            });
+        }
+
+        public async Task<AssetImage> GetImageById(string id) 
+        {
+            string sql = @"select * from assetphotos where photo_id = @id";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.QueryFirstAsync<AssetImage>(sql, new 
+            {
+                id
+            });
+           
+        }
+       
     }
 }
