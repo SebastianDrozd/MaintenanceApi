@@ -23,5 +23,18 @@ namespace MaintenanceApi.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<ActionResult> CreateNewMechanic(CreateMechanicRequest mechanic) 
+        {
+            var res = _service.CreateNewMechanic(mechanic);
+            return Created();
+        }
+        [HttpGet("full")]
+        public async Task<ActionResult> GetAllMechanicsFull() 
+        {
+            var res = await _service.GetAllMechanicsFull();
+            return Ok(res);
+        }
+
     }
 }

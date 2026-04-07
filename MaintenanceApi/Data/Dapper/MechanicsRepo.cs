@@ -31,5 +31,29 @@ namespace MaintenanceApi.Data.Dapper
                 id
             }));
         }
+
+        public async Task<int> CreateNewMechanic(CreateMechanicRequest mechanic) 
+        {
+            var sql = @"insert into mechanics (FirstName,Lastname,Shift,Department,Notes)
+                        values(@FirstName,@LastName,@Shift,@Department,@Notes)";
+            await using var connection = new MySqlConnection(_MysqlConnectionString);
+            return await connection.ExecuteAsync(sql, new 
+            {
+                mechanic.FirstName,
+                mechanic.LastName,
+          
+                mechanic.Shift,
+                mechanic.Department,
+                mechanic.Notes
+            });
+        }
+
+        public async Task<List<FullMechanicResponse>> GetAllMechanicsFull() 
+        {
+            string sql = @"select * from mechanics";
+
+            await using var connection = new MySqlConnection(_MysqlConnectionString);
+            return (await connection.QueryAsync<FullMechanicResponse>(sql)).AsList();
+        }
     }
 }
