@@ -1,4 +1,6 @@
 ﻿using MaintenanceApi.Data.Dapper;
+using MaintenanceApi.Dto.Assets;
+using MaintenanceApi.Dto.Pagination;
 using MaintenanceApi.Dto.WorkOrders;
 
 namespace MaintenanceApi.Service
@@ -129,7 +131,7 @@ namespace MaintenanceApi.Service
             return workOrders;
         }
 
-        public async Task<dynamic> GetWorkOrdersQuery(string sortBy,string sortDirection,string searchTerm,string status,string priority) 
+        public async Task<dynamic> GetWorkOrdersQuery(int page,int pageSize,string sortBy,string sortDirection,string searchTerm,string status,string priority,string type) 
 
         {
             if (searchTerm.IsWhiteSpace()) 
@@ -137,8 +139,35 @@ namespace MaintenanceApi.Service
                 Console.WriteLine("String is whitespace");
                 searchTerm = string.Empty;
             }
-            var workOrders = await _repo.GetWorkOrdersQuery(sortBy,sortDirection,searchTerm,status,priority);
-            return workOrders;
+            if (type.IsWhiteSpace())
+            {
+                type = "Regular";
+            }
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            var workOrders = await _repo.GetWorkOrdersQuery(page,pageSize,sortBy,sortDirection,searchTerm,status,priority,type);
+            var count = await _repo.CountWorkOrders(searchTerm, status, priority, type);
+            var totalPages = (int)Math.Ceiling(count / (double)pageSize);
+            return new PaginatedList<dynamic>
+            {
+                Items = workOrders,
+                PageIndex = page,
+                PageSize = pageSize,
+                TotalCount = count,
+                TotalPages = totalPages
+            };
+        }
+
+        public async Task<DashboardStatsResponse> GetDashboardCardStats() 
+        {
+            var res = await _repo.GetDashboardStats();
+            return res;
+        }
+
+        public async Task<int> CreatedAutomatedWorkOrder(CreateAutomatedWorkOrderRequest wo) 
+        {
+            var res = await _repo.CreateAuomatedWorkOrder(wo);
+            return res;
         }
     }
 }

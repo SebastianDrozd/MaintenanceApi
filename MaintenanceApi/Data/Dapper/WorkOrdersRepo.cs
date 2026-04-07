@@ -104,25 +104,76 @@ namespace MaintenanceApi.Data.Dapper
             return (await connection.QueryAsync<dynamic>(sql)).AsList();
         }
 
-        public async Task<List<dynamic>> GetWorkOrdersQuery(string sortBy,string sortDirection, string searchTerm,string status,string priority)
+        public async Task<List<dynamic>> GetWorkOrdersQuery(int page,int pageSize,string sortBy,string sortDirection, string searchTerm,string status,string priority,string type)
         {
-            Console.WriteLine($"This is sortby : {sortBy}, this is direction : {sortDirection}. This is term : {searchTerm}");
+            Console.WriteLine($"This is sortby : {sortBy}, this is direction : {sortDirection}. This is term : {searchTerm}, THis is TYpe : {type}");
             var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase){"Id","Priority","Type","Status","Date","Requestor"};
 
             // Default fallback
             var column = allowedColumns.Contains(sortBy) ? sortBy : "Date";
-
+            int rows = (page - 1) * pageSize;
             string sql = $@"SELECT wo.Id,wo.Priority,wo.Type,wo.Status,wo.Date,wo.Requestor,wo.Description, mech.FirstName,mech.LastName,a.comp_desc 
                             FROM workorders wo
                             INNER JOIN mechanics mech ON mech.id = wo.mechanic
                             INNER JOIN assets a ON wo.asset = a.compid
-                            Where wo.Description like '%{searchTerm}%' AND wo.Status like '%{status}%' AND wo.Priority like '%{priority}%%'
+                            Where wo.Description like '%{searchTerm}%' AND wo.Status like '%{status}%' AND wo.Priority like '%{priority}%%' and wo.Type like '%{type}%'
                             ORDER BY wo.{column} {sortDirection}
-                            LIMIT 15";
+                            LIMIT @pageSize OFFSET @rows;";
 
             await using var connection = new MySqlConnection(_myslConnectionString);
 
-            return (await connection.QueryAsync<dynamic>(sql)).AsList();
+            return (await connection.QueryAsync<dynamic>(sql, new { pageSize,rows})).AsList();
+        }
+
+        public async Task<DashboardStatsResponse> GetDashboardStats()
+        {
+            string sql = @"
+        SELECT
+            (SELECT COUNT(*) 
+             FROM workorders 
+             WHERE status = 'Open') AS ActiveOrders,
+
+            (SELECT COUNT(*) 
+             FROM workorders 
+             WHERE status = 'Open'
+               AND DueDate < NOW()) AS PastDue,
+
+            (SELECT COUNT(*) 
+             FROM workorders 
+             WHERE Date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) AS NewThisWeek,
+
+            (SELECT COUNT(*) 
+             FROM workorders 
+             WHERE type = 'Pm') AS OpenPms;
+    ";
+
+            await using var connection = new MySqlConnection(_myslConnectionString);
+            return await connection.QueryFirstOrDefaultAsync<DashboardStatsResponse>(sql);
+        }
+
+        public async Task<int> CreateAuomatedWorkOrder(CreateAutomatedWorkOrderRequest wo) 
+        {
+            string sql = @"Insert into workorders (Asset,Type,Description,Priority,Mechanic,Requestor,PmTemplateId)
+                            values (@Asset,@Type,@Description,@Priority,@Mechanic,@Requestor,@PmTemplatedId)";
+            await using var connection = new MySqlConnection(_myslConnectionString);
+
+            return await connection.ExecuteAsync(sql, new 
+            {
+                wo.Asset,
+                wo.Type,
+                wo.Description,
+                wo.Priority,
+                wo.Mechanic,
+                wo.Requestor,
+                wo.PmTemplatedId
+            });
+        }
+
+        public async Task<int> CountWorkOrders(string searchTerm, string status, string priority, string type) 
+        {
+            string sql = $@"SELECT COUNT(Id) FROM workorders Where Description like '%{searchTerm}%' AND Status like '%{status}%' AND Priority like '%{priority}%%' and Type like '%{type}%'";
+            await using var connection = new MySqlConnection(_myslConnectionString);
+            return await connection.ExecuteScalarAsync<int>(sql);
         }
     }
 }

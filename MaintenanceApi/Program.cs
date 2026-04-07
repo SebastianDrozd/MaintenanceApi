@@ -61,9 +61,9 @@ namespace MaintenanceApi
                 options.AddPolicy(name: "AllowSpecificOrigin",
                                   policy =>
                                   {
-                                      policy.WithOrigins("http://localhost:3000")
+                                      policy.WithOrigins("http://localhost:3000","http://sebastian.bobak.local:3000")
                                         .AllowCredentials()
-                                          
+               
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                                   });

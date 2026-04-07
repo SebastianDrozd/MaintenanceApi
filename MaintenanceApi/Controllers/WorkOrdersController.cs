@@ -24,9 +24,9 @@ namespace MaintenanceApi.Controllers
         }
 
         [HttpGet("query")]
-        public async Task<ActionResult> GetWorkOrdersQuery([FromQuery] string sortBy,string sortDirection,string? searchTerm,string? status,string? priority) 
+        public async Task<ActionResult> GetWorkOrdersQuery([FromQuery] int page, int pageSize, string sortBy,string sortDirection,string? searchTerm,string? status,string? priority, string? type) 
         {
-            var workOrders = await _service.GetWorkOrdersQuery(sortBy,sortDirection,searchTerm,status,priority);
+            var workOrders = await _service.GetWorkOrdersQuery(page,pageSize,sortBy,sortDirection,searchTerm,status,priority,type);
             return Ok(workOrders);
         } 
 
@@ -63,6 +63,19 @@ namespace MaintenanceApi.Controllers
         {
             Console.WriteLine(id);
             var res = await _service.CloseWorkOrder(wo,id);
+            return Ok(res);
+        }
+        [HttpGet("stats")]
+        public async Task<ActionResult> GetDashboardStats() 
+        {
+            var res = await _service.GetDashboardCardStats();
+            return Ok(res);
+        }
+
+        [HttpPost("automated")]
+        public async Task<ActionResult> CreatedAutomatedWorkOrder(CreateAutomatedWorkOrderRequest wo) 
+        {
+            var res = await _service.CreatedAutomatedWorkOrder(wo);
             return Ok(res);
         }
        
