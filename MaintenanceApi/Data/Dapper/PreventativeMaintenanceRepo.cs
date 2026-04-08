@@ -2,6 +2,7 @@
 using MaintenanceApi.Dto.Pm;
 using MaintenanceApi.Dto.WorkOrders;
 using MySqlConnector;
+using System.Net.NetworkInformation;
 
 namespace MaintenanceApi.Data.Dapper
 {
@@ -89,6 +90,29 @@ namespace MaintenanceApi.Data.Dapper
             return (await connection.QueryAsync<ShortPmTemplateResponse>(sql)).AsList();
         }
 
+        public async Task<List<ShortPmTemplateResponse>> GetShortPmTempaltesQuery(int page, int pageSize,string searchTerm, string frequency)
+        {
+            int rows = (page - 1) * pageSize;
+            string sql = $@"select temp.Id, temp.Description as Description,temp.Frequency as Frequency,temp.LastRun as LastRun,temp.NextRunDate as NextRunDate, m.FirstName, m.LastName, a.comp_Desc as Asset
+                            from pmtemplate temp
+                            Inner join mechanics m
+                            on temp.Mechanic=m.Id
+                            Inner Join assets a
+                            on temp.Asset=a.compid
+                            WHERE temp.Description like '%{searchTerm}%' and temp.Frequency like '%{frequency}%'
+                            LIMIT @pageSize OFFSET @rows;";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return (await connection.QueryAsync<ShortPmTemplateResponse>(sql, new {pageSize,rows})).AsList();
+        }
+
+
+        public async Task<int> CountPmTemplates(string searchTerm, string frequency) 
+        {
+            string sql = $@"SELECT COUNT(Id) FROM pmtemplate Where Description like '%{searchTerm}%' AND Frequency like '%{frequency}%'";
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+            return await connection.ExecuteScalarAsync<int>(sql);
+        }
+
         public async Task<PmTemplateSqlWrapper> GetPmTemplateById(int id) 
         {
             string sql = @"select temp.Id, temp.Description , temp.Priority, temp.NextRunDate, temp.CreatedBy, temp.LastRun, temp.Frequency, temp.CreatedDate,temp.Status, asset.compid as AssetId, asset.comp_desc as AssetDesc, mech.Id as MechId, mech.FirstName as MechFirstname, mech.LastName as MechLastName
@@ -132,5 +156,6 @@ namespace MaintenanceApi.Data.Dapper
             });
 
         }
+
     }
 }

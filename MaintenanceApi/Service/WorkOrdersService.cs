@@ -1,7 +1,9 @@
 ﻿using MaintenanceApi.Data.Dapper;
 using MaintenanceApi.Dto.Assets;
+using MaintenanceApi.Dto.Logs;
 using MaintenanceApi.Dto.Pagination;
 using MaintenanceApi.Dto.WorkOrders;
+using MaintenanceApi.Util.Email;
 
 namespace MaintenanceApi.Service
 {
@@ -9,11 +11,15 @@ namespace MaintenanceApi.Service
     {
         private readonly WorkOrdersRepo _repo;
         private readonly WorkOrdersImagesRepo _imagesRepo;
+        private readonly EmailService _emailService;
+        private readonly LogService _logsService;
         
-        public WorkOrdersService(WorkOrdersRepo repo, WorkOrdersImagesRepo imagesRepo)
+        public WorkOrdersService(WorkOrdersRepo repo, WorkOrdersImagesRepo imagesRepo, EmailService emailService, LogService logService)
         {
             _repo = repo;
             _imagesRepo = imagesRepo;
+            _emailService = emailService;
+            _logsService = logService;
         }
             
 
@@ -34,6 +40,19 @@ namespace MaintenanceApi.Service
                 DueDate = dueDate
 
             });
+
+            if (newId > 0) 
+            {
+                await _logsService.CreateNewEvent(new CreateNewLogRequest 
+                {
+                    event_type = "work_order",
+                    event_action = "Created",
+                    entity_id = newId,
+                    description = $"New work order created : {wo.Description}",
+                    performed_by = wo.Requestor
+                });
+            }
+
             //handle images
             if (newId > 0 && wo?.Photos?.Count > 0)
             {
@@ -58,6 +77,16 @@ namespace MaintenanceApi.Service
                     });
                 }
             }
+
+            try
+            {
+              //  var message = $"View your work order at http://sebastian.bobak.local:3000/dashboard/workorders/{newId}";
+                //await _emailService.SendEmail("sdrozd","New Work Order Created",message);
+            }
+            catch (Exception ex) 
+            {
+
+            }
             return newId;
 
         }
@@ -66,6 +95,14 @@ namespace MaintenanceApi.Service
         public async Task<int> UpdateWorkOrder(UpdateWorkOrderRequest wo,int id) 
         {
             var result = await _repo.UpdateWorkOrder(wo, id);
+            await _logsService.CreateNewEvent(new CreateNewLogRequest
+            {
+                event_type = "work_order",
+                event_action = "Updated",
+                entity_id = id,
+                description = $"Work work order : {wo.Description}",
+                performed_by = "maintenance"
+            });
             return result;
         }
 

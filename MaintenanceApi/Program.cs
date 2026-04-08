@@ -3,6 +3,7 @@ using MaintenanceApi.Data.Dapper;
 using MaintenanceApi.Middleware;
 using MaintenanceApi.Service;
 using MaintenanceApi.Util;
+using MaintenanceApi.Util.Email;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using QuestPDF.Infrastructure;
 using Scalar.AspNetCore;
@@ -37,6 +38,9 @@ namespace MaintenanceApi
             builder.Services.AddScoped<PreventativeMaintenanceRepo>();
             builder.Services.AddScoped<PreventativeMaintenanceService>();
             builder.Services.AddScoped<AssetImagesRepo>();
+            builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<LogsRepo>();
+            builder.Services.AddScoped<LogService>();
             // Use Serilog as the logging provider
       
 
@@ -46,7 +50,7 @@ namespace MaintenanceApi
                 {
                     options.Cookie.Name = "maintenance_auth";
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
                     options.Cookie.SameSite = SameSiteMode.Lax;
 
                     options.LoginPath = "/api/auth/login";

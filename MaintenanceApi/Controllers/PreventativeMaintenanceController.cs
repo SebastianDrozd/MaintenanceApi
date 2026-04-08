@@ -45,12 +45,18 @@ namespace MaintenanceApi.Controllers
             var pmTemplates = await _service.GetShortPmTemplates();
             return Ok(pmTemplates);
         }
+        [HttpGet("templates/short/query")]
+        public async Task<ActionResult> GetShortPmTemplatesQuery([FromQuery] int page, int pageSize, string? searchTerm, string? frequency) 
+        {
+            var templates = await _service.GetShortPmTemplatesQuery(page, pageSize, searchTerm, frequency);
+            return Ok(templates);
+        }
 
         [HttpGet("templates/{id}",Name ="GetTemplateById")]
         public async Task<ActionResult<FullPmTemplateResponse>> GetPmTemplateById(int id) 
         {
-            var pmTemplate = await _service.GetPmTemplateById(id);
-            return Ok(pmTemplate);
+            var pmTemplates = await _service.GetPmTemplateById(id);
+            return Ok(pmTemplates);
         }
 
         [HttpPut("templates/{id}")]

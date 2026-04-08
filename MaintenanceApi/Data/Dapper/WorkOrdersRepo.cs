@@ -73,12 +73,13 @@ namespace MaintenanceApi.Data.Dapper
 
         public async Task<List<dynamic>> GetWorkOrderById(int id) 
         {
-            string sql  = @"Select * from workorders wo
-                            Inner Join mechanics mech
-                            on mech.Id = wo.Mechanic 
-                            Inner join assets a
-                            on a.compid = wo.Asset
-                             where wo.Id = @id";
+            string sql  = @"SELECT *
+                            FROM workorders wo
+                            INNER JOIN mechanics mech
+                                ON mech.Id = wo.Mechanic
+                            LEFT JOIN assets a
+                                ON a.compid = wo.Asset
+                            WHERE wo.Id = @id;";
 
             await using var connection = new MySqlConnection(_myslConnectionString);
 
@@ -93,7 +94,7 @@ namespace MaintenanceApi.Data.Dapper
             string sql = @"Select wo.Id , wo.Priority, wo.Type, wo.status,wo.Date, wo.Requestor, wo.Description, wo.Status,mech.FirstName, mech.LastName, a.comp_desc from workorders wo
                            inner join mechanics mech
                             on mech.id = wo.mechanic
-                            inner join assets a
+                            LEFT JOIN assets a
                             on wo.asset = a.compid
                             where wo.status = 'open'
                             Order by wo.date DESC
@@ -115,7 +116,7 @@ namespace MaintenanceApi.Data.Dapper
             string sql = $@"SELECT wo.Id,wo.Priority,wo.Type,wo.Status,wo.Date,wo.Requestor,wo.Description, mech.FirstName,mech.LastName,a.comp_desc 
                             FROM workorders wo
                             INNER JOIN mechanics mech ON mech.id = wo.mechanic
-                            INNER JOIN assets a ON wo.asset = a.compid
+                            LEFT JOIN assets a ON wo.asset = a.compid
                             Where wo.Description like '%{searchTerm}%' AND wo.Status like '%{status}%' AND wo.Priority like '%{priority}%%' and wo.Type like '%{type}%'
                             ORDER BY wo.{column} {sortDirection}
                             LIMIT @pageSize OFFSET @rows;";
