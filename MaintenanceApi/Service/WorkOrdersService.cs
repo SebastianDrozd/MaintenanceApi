@@ -47,7 +47,7 @@ namespace MaintenanceApi.Service
                 {
                     event_type = "work_order",
                     event_action = "Created",
-                    entity_id = newId,
+                    entity_id = newId.ToString(),
                     description = $"New work order created : {wo.Description}",
                     performed_by = wo.Requestor
                 });
@@ -98,10 +98,10 @@ namespace MaintenanceApi.Service
             await _logsService.CreateNewEvent(new CreateNewLogRequest
             {
                 event_type = "work_order",
-                event_action = "Updated",
-                entity_id = id,
-                description = $"Work work order : {wo.Description}",
-                performed_by = "maintenance"
+                event_action = "Modified",
+                entity_id = id.ToString(),
+                description = $"Work was modified : {wo.Description}",
+                performed_by = wo.UpdatedBy
             });
             return result;
         }
@@ -117,7 +117,14 @@ namespace MaintenanceApi.Service
                 ClosedBy = wo.ClosedBy,
 
             });
-         
+            await _logsService.CreateNewEvent(new CreateNewLogRequest
+            {
+                event_type = "work_order",
+                event_action = "Completed",
+                entity_id = id.ToString(),
+                description = $"Closed work order : {wo.ClosedDescription}",
+                performed_by = wo.ClosedBy
+            });
             if (rowsAffected > 0 && wo.ClosedPhoto != null) 
             {
                 Console.WriteLine("phot is not null.activing save");

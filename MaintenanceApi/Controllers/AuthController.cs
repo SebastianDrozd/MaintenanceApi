@@ -69,13 +69,22 @@ namespace MaintenanceApi.Controllers
         public ActionResult Me() 
         {
             var username = User.Identity?.Name;
-            var role = "Admin";
-
+            var roleResult = User.IsInRole("Admin");
+          
+            var role = roleResult ? "Admin" : "User";
             return Ok(new
             {
                 username,
                 role
             });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return Ok(new { message = "Logged out successfully" });
         }
     }
 }

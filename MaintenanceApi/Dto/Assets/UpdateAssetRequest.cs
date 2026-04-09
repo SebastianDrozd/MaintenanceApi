@@ -18,5 +18,7 @@
 
         public List<IFormFile>? newImages { get; set; } = [];
 
+        public string UpdatedBy { get; set; }
+
     }
 }

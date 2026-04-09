@@ -84,7 +84,7 @@ namespace MaintenanceApi.Data.Dapper
                             from pmtemplate temp
                             Inner join mechanics m
                             on temp.Mechanic=m.Id
-                            Inner Join assets a
+                            LEFT Join assets a
                             on temp.Asset=a.compid";
             await using var connection = new MySqlConnection(_mysqlConnectionString);
             return (await connection.QueryAsync<ShortPmTemplateResponse>(sql)).AsList();
@@ -97,7 +97,7 @@ namespace MaintenanceApi.Data.Dapper
                             from pmtemplate temp
                             Inner join mechanics m
                             on temp.Mechanic=m.Id
-                            Inner Join assets a
+                            left Join assets a
                             on temp.Asset=a.compid
                             WHERE temp.Description like '%{searchTerm}%' and temp.Frequency like '%{frequency}%'
                             LIMIT @pageSize OFFSET @rows;";
@@ -117,7 +117,7 @@ namespace MaintenanceApi.Data.Dapper
         {
             string sql = @"select temp.Id, temp.Description , temp.Priority, temp.NextRunDate, temp.CreatedBy, temp.LastRun, temp.Frequency, temp.CreatedDate,temp.Status, asset.compid as AssetId, asset.comp_desc as AssetDesc, mech.Id as MechId, mech.FirstName as MechFirstname, mech.LastName as MechLastName
                            from pmtemplate temp
-                           Inner Join assets asset on temp.Asset = asset.compid
+                           Left Join assets asset on temp.Asset = asset.compid
                            Inner join mechanics mech on temp.Mechanic = mech.Id
                            where temp.Id = @id";
             await using var connection = new MySqlConnection(_mysqlConnectionString);
@@ -130,7 +130,7 @@ namespace MaintenanceApi.Data.Dapper
         public async Task<int> UpdatePmTemplateById(UpdatePmTemplateRequest pm, int id) 
         {
             string sql = @"Update pmtemplate
-                           set Asset = @Asset, Mechanic = @Mechanic, Priority = @Priority, NextRunDate = @NextRunDate, Frequency = @Frequency, Description = @Description
+                           set Asset = @Asset, Mechanic = @Mechanic, Priority = @Priority, NextRunDate = @NextRunDate, Frequency = @Frequency, Description = @Description,UpdatedBy = @UpdatedBy
                             where Id = @id";
 
             await using var connection = new MySqlConnection(_mysqlConnectionString);
@@ -142,6 +142,7 @@ namespace MaintenanceApi.Data.Dapper
                 pm.NextRunDate,
                 pm.Frequency,
                 pm.Description,
+                pm.UpdatedBy,
                 id
             });
         }

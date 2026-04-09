@@ -61,5 +61,11 @@ namespace MaintenanceApi.Controllers
             var res = await _service.UpdateAsset(id, asset);
             return NoContent();
         }
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteAsset(string id) 
+        {
+            await _service.DeleteAssetById(id);
+            return NoContent();
+        }
     }
 }

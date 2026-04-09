@@ -11,5 +11,6 @@
         public string status { get; set; }
         public string? service_date { get; set; }
         public List<IFormFile>? Photos { get; set; }
+        public string CreatedBy { get; set; }
     }
 }

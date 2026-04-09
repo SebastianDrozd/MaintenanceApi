@@ -14,10 +14,10 @@ namespace MaintenanceApi.Controllers
            _service = service;
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetLogs() 
+        [HttpGet("query")]
+        public async Task<ActionResult> GetLogs([FromQuery] int page, int pageSize,string? searchTerm, string? type, string? action) 
         {
-            var logs = await _service.GetLogs();
+            var logs = await _service.GetLogs(page,pageSize,searchTerm,type,action);
             return Ok(logs);
         } 
     }

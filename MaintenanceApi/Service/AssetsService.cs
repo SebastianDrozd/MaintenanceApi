@@ -1,7 +1,9 @@
 ﻿using MaintenanceApi.Data.Dapper;
 using MaintenanceApi.Dto.Assets;
 using MaintenanceApi.Dto.Auth;
+using MaintenanceApi.Dto.Logs;
 using MaintenanceApi.Dto.Pagination;
+using MaintenanceApi.Dto.Pm;
 using MaintenanceApi.Dto.WorkOrders;
 
 namespace MaintenanceApi.Service
@@ -10,11 +12,13 @@ namespace MaintenanceApi.Service
     {
         private readonly AssetsRepo _repo;
         private readonly AssetImagesRepo _imagesRepo;
+        private readonly LogService _logsService;
 
-        public AssetsService(AssetsRepo repo, AssetImagesRepo imagesRepo) 
+        public AssetsService(AssetsRepo repo, AssetImagesRepo imagesRepo,LogService logService) 
         {
             _repo = repo;
             _imagesRepo = imagesRepo;
+            _logsService = logService;
         }
 
 
@@ -55,10 +59,18 @@ namespace MaintenanceApi.Service
 
         public async Task<dynamic> CreateNewAsset(CreateAssetRequest asset) 
         {
-            Guid id = Guid.NewGuid();
+            string id = Guid.NewGuid().ToString("N").Substring(0, 8);
 
-            var res = await _repo.CreateNewAsset(id.ToString(), asset);
-
+            var res = await _repo.CreateNewAsset(id, asset);
+            await _logsService.CreateNewEvent(new CreateNewLogRequest
+            {
+                event_type = "asset",
+                event_action = "Created",
+                description = $"New asset created: {asset.comp_desc}",
+                performed_by = asset.CreatedBy,
+                entity_id = id
+                
+            });
             //handle images
             if (res > 0 && asset?.Photos?.Count > 0) 
             {
@@ -105,7 +117,15 @@ namespace MaintenanceApi.Service
             Console.WriteLine($"Length of new Images {asset.newImages.Count}");
             var res = await _repo.UpdateAsset(id, asset);
 
+            await _logsService.CreateNewEvent(new CreateNewLogRequest
+            {
+                event_type = "asset",
+                event_action = "Modified",
+                description = $"Asset was modified",
+                performed_by = asset.UpdatedBy,
+                entity_id = id
 
+            });
 
             if (asset.removedImageIds.Count > 0) 
             {
@@ -151,6 +171,21 @@ namespace MaintenanceApi.Service
                 }
 
             }
+            return res;
+        }
+
+        public async Task<dynamic> DeleteAssetById(string id) 
+        {
+            var res = _repo.DeleteAssetById(id);
+            await _logsService.CreateNewEvent(new Dto.Logs.CreateNewLogRequest
+            {
+                event_type = "asset",
+                event_action = "Deleted",
+                description = $"Asset was Deleted : ${id}",
+                performed_by = "maintenance",
+                entity_id = id
+
+            });
             return res;
         }
     }

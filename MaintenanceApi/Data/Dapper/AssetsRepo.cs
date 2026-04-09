@@ -57,8 +57,8 @@ namespace MaintenanceApi.Data.Dapper
 
         public async Task<int> CreateNewAsset(string id,CreateAssetRequest asset) 
         {
-            string sql = @"Insert into assets(compid,comp_desc,line_no,department,manufacturer,model_no,serial_no,status)
-                           values(@id,@comp_desc,@line_no,@department,@manufacturer,@model_no,@serial_no,@status)";
+            string sql = @"Insert into assets(compid,comp_desc,line_no,department,manufacturer,model_no,serial_no,status,CreatedBy)
+                           values(@id,@comp_desc,@line_no,@department,@manufacturer,@model_no,@serial_no,@status,@CreatedBy)";
             await using var connection = new MySqlConnection(_mysqlConnectionString);
 
             return await connection.ExecuteAsync(sql, new 
@@ -70,7 +70,8 @@ namespace MaintenanceApi.Data.Dapper
                 asset.manufacturer,
                 asset.model_no,
                 asset.serial_no,
-                asset.status
+                asset.status,
+                asset.CreatedBy
             });
         }
 
@@ -103,6 +104,15 @@ namespace MaintenanceApi.Data.Dapper
                 asset.full_desc,
                 id
             });
+        }
+
+        public async Task<int> DeleteAssetById(string id) 
+        {
+            string sql = @"delete from assets where compid = @id";
+
+            await using var connection = new MySqlConnection(_mysqlConnectionString);
+
+            return await connection.ExecuteAsync(sql);
         }
 
     

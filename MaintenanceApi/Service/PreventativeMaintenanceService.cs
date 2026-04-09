@@ -11,11 +11,12 @@ namespace MaintenanceApi.Service
     {
         private readonly PreventativeMaintenanceRepo _repo;
         private readonly MechanicsRepo _mechanicsRepo;
-
-        public PreventativeMaintenanceService(PreventativeMaintenanceRepo repo, MechanicsRepo mechrepo)
+        private readonly LogService _logService;
+        public PreventativeMaintenanceService(PreventativeMaintenanceRepo repo, MechanicsRepo mechrepo, LogService logService)
         {
             _repo = repo;
             _mechanicsRepo = mechrepo;
+            _logService = logService;
         }
 
         public async Task<dynamic> GetPmTemplates()
@@ -33,6 +34,21 @@ namespace MaintenanceApi.Service
         public async Task<int> CreateNewPmTemplate(CreatePmTemplateRequest pm)
         {
             var id = await _repo.CreatePmTemplate(pm);
+
+            if (id > 0) 
+            {
+                await _logService.CreateNewEvent(new Dto.Logs.CreateNewLogRequest
+                {
+                    event_type = "pm_template",
+                    event_action = "Created",
+                    entity_id = id.ToString(),
+                    description = $"New Pm template created : ${pm.Description}",
+                    performed_by = pm.CreatedBy
+
+                });
+            }
+
+
 
             if (id != 0 && pm.Tasks.Count > 0)
             {
@@ -123,12 +139,31 @@ namespace MaintenanceApi.Service
         public async Task<dynamic> UpdatePmTemplateById(UpdatePmTemplateRequest pm, int id) 
         {
             var res = await _repo.UpdatePmTemplateById(pm, id);
+            await _logService.CreateNewEvent(new Dto.Logs.CreateNewLogRequest
+            {
+                event_type = "pm_template",
+                event_action = "Modified",
+                entity_id = id.ToString(),
+                description = $"Pm template was modified : ${pm.Description}",
+                performed_by = pm.UpdatedBy
+
+            });
             return res;
         }
 
         public async Task<dynamic> DeletePmTemplate(int id) 
         {
+            var template = await _repo.GetPmTemplateById(id);
             var res = await _repo.DeletePmTemplate(id);
+            await _logService.CreateNewEvent(new Dto.Logs.CreateNewLogRequest
+            {
+                event_type = "pm_template",
+                event_action = "Deleted",
+                entity_id = id.ToString(),
+                description = $"Pm template was Deleted : ${template.Description}",
+                performed_by = "maintenance"
+
+            });
             return res;
         }
     }
